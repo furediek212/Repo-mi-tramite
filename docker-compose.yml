@@ -1,0 +1,33 @@
+# Levanta todo con un solo comando:  docker compose up -d
+# Luego abre http://localhost:3000 (reservas clientes) y http://localhost:3000/app (empleados)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: canchas
+      POSTGRES_USER: canchas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cambia-esta-clave}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"   # expuesto para conectar Power BI; ciérralo en el firewall si no lo usas
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canchas"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://canchas:${DB_PASSWORD:-cambia-esta-clave}@db:5432/canchas
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

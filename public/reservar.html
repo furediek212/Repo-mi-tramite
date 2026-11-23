@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserva tu cancha</title>
+<link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+<header class="cabecera"><div class="contenedor">
+  <h1>⚽ Reserva tu cancha</h1><span class="espacio"></span>
+  <button class="sec chico" id="btnMiReserva">Consultar / cancelar mi reserva</button>
+</div></header>
+
+<main class="contenedor pasos" id="flujo">
+  <section class="tarjeta paso">
+    <h2>Elige sede y tipo de cancha</h2>
+    <div class="fila">
+      <div><label for="sede">Sede</label><select id="sede"></select></div>
+      <div><label>Tipo</label><div class="opciones" id="tipos">
+        <button class="opcion sel" data-tipo="">Todas</button>
+        <button class="opcion" data-tipo="F5">Fútbol 5</button>
+        <button class="opcion" data-tipo="F8">Fútbol 8</button>
+      </div></div>
+    </div>
+    <p class="suave" id="infoSede"></p>
+    <label style="margin-top:8px">Cancha</label>
+    <div class="opciones" id="canchas"></div>
+  </section>
+
+  <section class="tarjeta paso">
+    <h2>Elige fecha, duración y hora</h2>
+    <div class="fila">
+      <div><label for="fecha">Fecha</label><input type="date" id="fecha"></div>
+      <div><label>Duración</label><div class="opciones" id="duraciones"></div></div>
+    </div>
+    <p class="suave" id="tituloDia" style="margin-top:12px"></p>
+    <div class="slots" id="slots"></div>
+  </section>
+
+  <section class="tarjeta paso">
+    <h2>Tus datos</h2>
+    <div id="resumen" class="aviso info">Selecciona una cancha y una hora.</div>
+    <form id="form" class="fila">
+      <div><label for="nombre">Nombre</label><input id="nombre" required maxlength="120" autocomplete="name"></div>
+      <div><label for="telefono">Celular</label><input id="telefono" required type="tel" maxlength="30" autocomplete="tel"></div>
+      <div><label for="email">Email (opcional)</label><input id="email" type="email" maxlength="160" autocomplete="email"></div>
+      <div style="flex-basis:100%"><button id="btnReservar" type="submit" disabled>Reservar</button></div>
+    </form>
+    <div id="msg"></div>
+  </section>
+</main>
+
+<main class="contenedor oculto" id="exito">
+  <section class="tarjeta" style="text-align:center">
+    <h2>¡Reserva registrada!</h2>
+    <p>Tu código de reserva es</p>
+    <div class="codigo" id="codigo"></div>
+    <p id="detalleExito"></p>
+    <p class="suave">Guarda este código. Con él y tu celular puedes consultar o cancelar tu reserva.</p>
+    <button onclick="location.reload()">Hacer otra reserva</button>
+  </section>
+</main>
+
+<div class="modal-fondo oculto" id="modalMiReserva"><div class="modal">
+  <h2>Mi reserva</h2>
+  <div class="fila">
+    <div><label for="mrCodigo">Código</label><input id="mrCodigo" maxlength="10" style="text-transform:uppercase"></div>
+    <div><label for="mrTel">Celular</label><input id="mrTel" type="tel"></div>
+  </div>
+  <div id="mrResultado"></div>
+  <div class="acciones">
+    <button class="sec" onclick="$('#modalMiReserva').classList.add('oculto')">Cerrar</button>
+    <button class="peligro oculto" id="mrCancelar">Cancelar reserva</button>
+    <button id="mrBuscar">Buscar</button>
+  </div>
+</div></div>
+
+<script src="/js/comun.js"></script>
+<script>
+const st = { sedes: [], sede: null, tipo: '', cancha: null, fecha: null, duracion: 1, hora: null, bloques: [] };
+
+async function cargar() {
+  const data = await api('/api/public/sedes');
+  st.sedes = data.sedes;
+  st.fecha = data.hoy;
+  $('#fecha').value = data.hoy; $('#fecha').min = data.hoy; $('#fecha').max = sumarDias(data.hoy, 60);
+  $('#sede').innerHTML = st.sedes.map((s) => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+  $('#duraciones').innerHTML = data.duraciones.map((d) =>
+    `<button class="opcion ${d === 1 ? 'sel' : ''}" data-d="${d}">${d === 1 ? '1 hora' : String(d).replace('.5', ' ½') + ' h'}</button>`).join('');
+  elegirSede(st.sedes[0]?.id);
+}
+
+function elegirSede(id) {
+  st.sede = st.sedes.find((s) => s.id === Number(id));
+  if (!st.sede) { $('#canchas').innerHTML = '<p class="suave">No hay sedes disponibles.</p>'; return; }
+  $('#infoSede').textContent = `${st.sede.direccion || ''}  ·  Horario ${st.sede.hora_apertura}:00 – ${st.sede.hora_cierre}:00  ·  Tel. ${st.sede.telefono || '-'}`;
+  st.cancha = null;
+  pintarCanchas();
+}
+
+function pintarCanchas() {
+  const lista = st.sede.canchas.filter((c) => !st.tipo || c.tipo === st.tipo);
+  $('#canchas').innerHTML = lista.length ? lista.map((c) =>
+    `<button class="opcion ${st.cancha?.id === c.id ? 'sel' : ''}" data-id="${c.id}">${esc(c.nombre)} · ${c.tipo === 'F5' ? 'Fútbol 5' : 'Fútbol 8'} · ${dinero(c.precio_hora)}/h</button>`
+  ).join('') : '<p class="suave">No hay canchas de este tipo en la sede.</p>';
+  if (!lista.find((c) => c.id === st.cancha?.id)) st.cancha = null;
+  cargarSlots();
+}
+
+async function cargarSlots() {
+  st.hora = null; actualizarResumen();
+  if (!st.cancha) { $('#slots').innerHTML = '<p class="suave">Elige una cancha para ver los horarios.</p>'; $('#tituloDia').textContent = ''; return; }
+  $('#tituloDia').textContent = `Horarios disponibles para ${fechaLarga(st.fecha)}`;
+  const d = await api(`/api/public/disponibilidad?cancha_id=${st.cancha.id}&fecha=${st.fecha}`);
+  st.bloques = d.bloques;
+  pintarSlots();
+}
+
+function libre(hora) {
+  const i = st.bloques.findIndex((b) => b.hora === hora);
+  const n = st.duracion * 2;
+  if (i < 0 || i + n > st.bloques.length) return false;
+  return st.bloques.slice(i, i + n).every((b) => !b.ocupado && !b.pasado);
+}
+
+function pintarSlots() {
+  const html = st.bloques.map((b) =>
+    `<button class="slot ${st.hora === b.hora ? 'sel' : ''}" data-h="${b.hora}" ${libre(b.hora) ? '' : 'disabled'}>${b.hora}</button>`).join('');
+  $('#slots').innerHTML = html || '<p class="suave">Sin horarios.</p>';
+  if (!st.bloques.some((b) => libre(b.hora))) $('#slots').insertAdjacentHTML('beforeend', '<p class="suave" style="grid-column:1/-1">No quedan horarios libres este día. Prueba otra fecha o cancha.</p>');
+}
+
+function actualizarResumen() {
+  const ok = st.cancha && st.hora;
+  $('#btnReservar').disabled = !ok;
+  $('#resumen').innerHTML = ok
+    ? `<b>${esc(st.sede.nombre)}</b> · ${esc(st.cancha.nombre)} (${st.cancha.tipo}) · ${fechaLarga(st.fecha)} · ${st.hora} · ${st.duracion} h · <b>Total ${dinero(st.cancha.precio_hora * st.duracion)}</b>`
+    : 'Selecciona una cancha y una hora.';
+}
+
+$('#sede').onchange = (e) => elegirSede(e.target.value);
+$('#tipos').onclick = (e) => { const b = e.target.closest('button'); if (!b) return;
+  st.tipo = b.dataset.tipo; $('#tipos').querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b)); pintarCanchas(); };
+$('#canchas').onclick = (e) => { const b = e.target.closest('button'); if (!b) return;
+  st.cancha = st.sede.canchas.find((c) => c.id === Number(b.dataset.id)); pintarCanchas(); };
+$('#duraciones').onclick = (e) => { const b = e.target.closest('button'); if (!b) return;
+  st.duracion = Number(b.dataset.d); $('#duraciones').querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b));
+  st.hora = null; pintarSlots(); actualizarResumen(); };
+$('#fecha').onchange = (e) => { if (e.target.value) { st.fecha = e.target.value; cargarSlots(); } };
+$('#slots').onclick = (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return;
+  st.hora = b.dataset.h; pintarSlots(); actualizarResumen(); };
+
+$('#form').onsubmit = async (e) => {
+  e.preventDefault();
+  $('#btnReservar').disabled = true; aviso($('#msg'), '');
+  try {
+    const r = await api('/api/public/reservas', { method: 'POST', body: {
+      cancha_id: st.cancha.id, fecha: st.fecha, hora: st.hora, duracion: st.duracion,
+      nombre: $('#nombre').value, telefono: $('#telefono').value, email: $('#email').value } });
+    $('#flujo').classList.add('oculto'); $('#exito').classList.remove('oculto');
+    $('#codigo').textContent = r.codigo;
+    $('#detalleExito').innerHTML = `${esc(r.sede)} · ${esc(r.cancha)}<br>${fechaLarga(r.inicio)} de ${hora(r.inicio)} a ${hora(r.fin)} · ${dinero(r.precio)}<br>
+      Estado: ${estadoTag(r.estado)}${r.estado === 'pendiente' ? '<br><span class="suave">La sede confirmará tu reserva.</span>' : ''}`;
+    window.scrollTo(0, 0);
+  } catch (err) {
+    aviso($('#msg'), err.message);
+    if (err.status === 409) cargarSlots();
+    $('#btnReservar').disabled = false;
+  }
+};
+
+// Consultar / cancelar
+$('#btnMiReserva').onclick = () => { $('#modalMiReserva').classList.remove('oculto'); $('#mrResultado').innerHTML = ''; $('#mrCancelar').classList.add('oculto'); };
+$('#mrBuscar').onclick = async () => {
+  try {
+    const r = await api(`/api/public/reservas/${encodeURIComponent($('#mrCodigo').value.trim())}?telefono=${encodeURIComponent($('#mrTel').value)}`);
+    $('#mrResultado').innerHTML = `<div class="aviso info">${esc(r.sede)} · ${esc(r.cancha)} (${r.tipo_cancha})<br>${fechaLarga(r.inicio)} · ${hora(r.inicio)}–${hora(r.fin)} · ${dinero(r.precio)}<br>${estadoTag(r.estado)}</div>`;
+    $('#mrCancelar').classList.toggle('oculto', !['pendiente', 'confirmada'].includes(r.estado));
+  } catch (err) { aviso($('#mrResultado'), err.message); $('#mrCancelar').classList.add('oculto'); }
+};
+$('#mrCancelar').onclick = async () => {
+  if (!confirm('¿Seguro que quieres cancelar la reserva?')) return;
+  try {
+    await api(`/api/public/reservas/${encodeURIComponent($('#mrCodigo').value.trim())}/cancelar`, { method: 'POST', body: { telefono: $('#mrTel').value } });
+    aviso($('#mrResultado'), 'Reserva cancelada.', 'ok'); $('#mrCancelar').classList.add('oculto');
+  } catch (err) { aviso($('#mrResultado'), err.message); }
+};
+
+cargar().catch((e) => aviso($('#msg'), e.message));
+</script>
+</body>
+</html>
