@@ -1,0 +1,37 @@
+# Despliegue en Render (https://render.com) con un clic: New + → Blueprint → elige este repositorio.
+# Crea la aplicación web y la base de datos PostgreSQL ya conectadas entre sí.
+services:
+  - type: web
+    name: canchas-control
+    runtime: node
+    plan: starter            # el plan "free" se duerme tras 15 min sin visitas: no sirve para reservas
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: canchas-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: BI_API_KEY
+        generateValue: true
+      - key: APP_TZ
+        value: America/Bogota
+      - key: AUTO_CONFIRMAR_WEB
+        value: "false"
+      - key: HORAS_MIN_CANCELACION
+        value: "2"
+      - key: ADMIN_EMAIL
+        sync: false          # Render te lo pedirá al crear el Blueprint
+      - key: ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: canchas-db
+    plan: basic-256mb
+    databaseName: canchas
+    user: canchas

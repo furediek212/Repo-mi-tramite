@@ -46,6 +46,19 @@ Al arrancar, la app crea/actualiza las tablas sola. No hay migraciones manuales.
 
 ## 2. Instalación en la nube (sin servidor propio)
 
+### Render con un clic (recomendado)
+
+El archivo `render.yaml` crea la app y la base de datos ya conectadas:
+
+1. Crea una cuenta en [render.com](https://render.com) y conecta tu GitHub.
+2. **New + → Blueprint** → elige este repositorio (rama `main`).
+3. Escribe `ADMIN_EMAIL` y `ADMIN_PASSWORD` cuando te los pida → **Apply**.
+4. En unos minutos tendrás una URL tipo `https://canchas-control.onrender.com`. Puedes conectar tu propio dominio en *Settings → Custom Domains*.
+
+La clave `BI_API_KEY` para Power BI se genera sola: la ves en *Environment* del servicio.
+
+### Otros proveedores
+
 Funciona en cualquier servicio que corra Node.js + PostgreSQL. Ejemplo sencillo:
 
 1. Crea una base PostgreSQL administrada (Supabase, Neon, Render, Railway, Azure Database for PostgreSQL…) y copia su URL de conexión.
