@@ -73,21 +73,45 @@ $('#btnPass').onclick = () => formModal('Cambiar contraseña', [
   { k: 'nueva', label: 'Nueva contraseña (mín. 8)', type: 'password', req: true },
 ], {}, (v) => api('/api/auth/password', { method: 'POST', body: v }).then(() => alert('Contraseña actualizada')));
 $('#selSede').onchange = (e) => { ui.sedeId = e.target.value ? Number(e.target.value) : null; render(); };
-$('#tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) ir(b.dataset.v); };
+$('#tabs').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.mas) menuMas(); else ir(b.dataset.v); };
+function menuMas() {
+  const op = [];
+  if (esAdmin()) op.push(['catalogo', '🏷️ Productos'], ['config', '🏟️ Sedes, canchas y usuarios'], ['bi', '📊 Reportes / Power BI']);
+  abrirModal(`<h2>${esc(sesion.usuario.nombre)}</h2><p class="suave">${esAdmin() ? 'Administrador' : 'Operador · ' + esc(sesion.usuario.sede || '')}</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${op.map(([v, t]) => `<button class="sec" data-ir="${v}" style="justify-content:flex-start">${t}</button>`).join('')}
+      <button class="sec" id="mPass" style="justify-content:flex-start">🔑 Cambiar contraseña</button>
+      <button class="sec" id="mSalir" style="justify-content:flex-start;color:var(--rojo)">↩ Salir</button>
+    </div><div class="acciones"><button class="sec" onclick="cerrarModal()">Cerrar</button></div>`);
+  $('#modalCuerpo').querySelectorAll('[data-ir]').forEach((b) => { b.onclick = () => { cerrarModal(); ir(b.dataset.ir); }; });
+  $('#mPass').onclick = () => $('#btnPass').click();
+  $('#mSalir').onclick = () => { cerrarModal(); $('#btnSalir').click(); };
+}
 
 function ir(v) {
   if (!VISTAS[v] || (['catalogo', 'config', 'bi'].includes(v) && !esAdmin())) v = 'inicio';
   ui.vista = v; location.hash = v;
-  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('activo', b.dataset.v === v));
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('activo', b.dataset.v === v || (!!b.dataset.mas && ['catalogo', 'config', 'bi'].includes(v))));
   render();
 }
 async function render() {
   const cont = $('#vista');
-  try { await VISTAS[ui.vista](cont); } catch (err) {
+  try { await VISTAS[ui.vista](cont); prepararTablas(cont); } catch (err) {
     if (err.status === 401) return mostrarLogin();
     cont.innerHTML = `<div class="aviso error">${esc(err.message)}</div>`;
   }
 }
+const esMovil = () => window.matchMedia('(max-width: 700px)').matches;
+/** En celular las tablas se muestran como tarjetas: cada celda toma su título de la cabecera. */
+function prepararTablas(cont) {
+  cont.querySelectorAll('.tabla-scroll table').forEach((t) => {
+    t.classList.add('resp');
+    const cab = [...(t.rows[0]?.cells || [])].map((c) => (c.tagName === 'TH' ? c.textContent.trim() : ''));
+    [...t.rows].forEach((tr) => { [...tr.cells].forEach((td, i) => { if (td.tagName === 'TD' && !td.hasAttribute('data-label')) td.dataset.label = td.colSpan > 1 ? '' : (cab[i] || ''); }); });
+  });
+}
+// Al girar el celular o cambiar de tamaño cruzando el límite, la agenda se redibuja (1 cancha ↔ todas).
+window.matchMedia('(max-width: 700px)').addEventListener('change', () => { if (sesion.token && ui.vista === 'reservas') render(); });
 const qsSede = () => (ui.sedeId ? `sede_id=${ui.sedeId}` : '');
 const nombreSede = (id) => ui.sedes.find((s) => s.id === id)?.nombre || '';
 const opcionesSedes = () => ui.sedes.map((s) => [s.id, s.nombre]);
@@ -133,7 +157,9 @@ VISTAS.reservas = async (cont) => {
     api(`/api/canchas?sede_id=${sedeGrilla}`),
     api(`/api/reservas?fecha=${ui.fecha}&sede_id=${sedeGrilla}`),
   ]);
-  const activas = canchas.filter((c) => c.activa);
+  const todas = canchas.filter((c) => c.activa);
+  if (!todas.find((c) => c.id === ui.canchaMovil)) ui.canchaMovil = todas[0]?.id;
+  const activas = esMovil() ? todas.filter((c) => c.id === ui.canchaMovil) : todas;
   const vivas = reservas.filter((r) => !['cancelada', 'no_asistio'].includes(r.estado));
   const filas = [];
   for (let m = sede.hora_apertura * 60; m < sede.hora_cierre * 60; m += 30) {
@@ -156,17 +182,18 @@ VISTAS.reservas = async (cont) => {
       <div style="flex:0 1 auto"><button id="btnNuevaReserva">+ Nueva reserva</button></div></div>
     ${!ui.sedeId && esAdmin() ? `<div class="aviso info">Mostrando <b>${esc(sede.nombre)}</b>. Elige una sede arriba para ver otra.</div>` : ''}
     <div class="tarjeta grilla"><h3>${esc(sede.nombre)} · ${fechaLarga(ui.fecha)}</h3>
+      <div class="chips-cancha">${todas.map((c) => `<button class="opcion chico ${c.id === ui.canchaMovil ? 'sel' : ''}" data-cm="${c.id}">${esc(c.nombre)} · ${c.tipo}</button>`).join('')}</div>
       ${activas.length ? `<table><tr><th></th>${activas.map((c) => `<th>${esc(c.nombre)}<br><small>${c.tipo === 'F5' ? 'Fútbol 5' : 'Fútbol 8'}</small></th>`).join('')}</tr>${filas.join('')}</table>` : '<p class="suave">Esta sede no tiene canchas activas.</p>'}
       <p class="suave"><small>Haz clic en un espacio vacío para reservar, o en una reserva para gestionarla. 💵 = pagada.</small></p></div>
     <div class="tarjeta tabla-scroll"><h3>Listado del día (${reservas.length})</h3>
       <table><tr><th>Hora</th><th>Cancha</th><th>Cliente</th><th>Origen</th><th>Estado</th><th class="num">Precio</th><th>Pago</th><th>Código</th></tr>
       ${reservas.map((r) => `<tr data-r="${r.id}" style="cursor:pointer"><td>${hora(r.inicio)}–${hora(r.fin)}</td><td>${esc(r.cancha)}</td>
-        <td>${esc(r.cliente)}<br><small class="suave">${esc(r.cliente_telefono)}</small></td><td>${esc(r.origen)}</td><td>${estadoTag(r.estado)}</td>
+        <td class="titulo-celda" data-label="">${esc(r.cliente)} <small class="suave">${esc(r.cliente_telefono)}</small></td><td class="ocultar-movil">${esc(r.origen)}</td><td>${estadoTag(r.estado)}</td>
         <td class="num">${dinero(r.precio)}</td><td>${r.pagado ? '✅' : '—'}</td><td><code>${esc(r.codigo)}</code></td></tr>`).join('') || '<tr><td colspan="8" class="suave">Sin reservas.</td></tr>'}
       </table></div>`;
   enlazarFecha(cont);
   const nueva = (canchaId, h) => formModal('Nueva reserva', [
-    { k: 'cancha_id', label: 'Cancha', type: 'select', opts: activas.map((c) => [c.id, `${c.nombre} (${c.tipo}) · ${dinero(c.precio_hora)}/h`]) },
+    { k: 'cancha_id', label: 'Cancha', type: 'select', opts: todas.map((c) => [c.id, `${c.nombre} (${c.tipo}) · ${dinero(c.precio_hora)}/h`]) },
     { k: 'fecha', label: 'Fecha', type: 'date', req: true },
     { k: 'hora', label: 'Hora inicio', type: 'select', opts: filas.map((_, i) => { const m = sede.hora_apertura * 60 + i * 30; const x = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; return [x, x]; }) },
     { k: 'duracion', label: 'Duración', type: 'select', opts: [[1, '1 hora'], [1.5, '1 ½ horas'], [2, '2 horas'], [2.5, '2 ½ horas'], [3, '3 horas']] },
@@ -178,6 +205,7 @@ VISTAS.reservas = async (cont) => {
     { k: 'notas', label: 'Notas', type: 'textarea' },
   ], { cancha_id: canchaId, fecha: ui.fecha, hora: h, duracion: 1 }, (v) => api('/api/reservas', { method: 'POST', body: { ...v, duracion: Number(v.duracion) } }), 'Reservar');
   $('#btnNuevaReserva').onclick = () => nueva(activas[0]?.id, null);
+  cont.querySelectorAll('[data-cm]').forEach((b) => { b.onclick = () => { ui.canchaMovil = Number(b.dataset.cm); render(); }; });
   cont.querySelectorAll('[data-c]').forEach((td) => { td.onclick = () => nueva(Number(td.dataset.c), td.dataset.h); });
   cont.querySelectorAll('[data-r]').forEach((el) => { el.onclick = () => detalleReserva(reservas.find((r) => r.id === Number(el.dataset.r))); });
 };
@@ -234,7 +262,7 @@ VISTAS.ventas = async (cont) => {
         ${inv.filter((p) => p.categoria === cat).map((p) => `<button class="opcion" data-p="${p.producto_id}" data-n="${esc((p.nombre + ' ' + p.sku).toLowerCase())}" ${p.stock <= 0 ? 'disabled' : ''}>
           ${esc(p.nombre)}<br><small>${dinero(p.precio_venta)} · stock ${p.stock}</small></button>`).join('')}</div>`).join('')}</div>
     </div>
-    <div class="tarjeta" style="flex:1 1 300px"><h3>Venta actual</h3>
+    <div class="tarjeta" style="flex:1 1 300px" id="carritoCard"><h3>Venta actual</h3>
       ${carrito.size ? `<table class="carrito">${[...carrito].map(([id, n]) => { const p = porId.get(id); return `<tr><td>${esc(p.nombre)}</td>
         <td><input type="number" min="0" max="${p.stock}" value="${n}" data-q="${id}"></td><td class="num">${dinero(p.precio_venta * n)}</td></tr>`; }).join('')}
         <tr><th colspan="2">Total</th><th class="num" style="font-size:18px">${dinero(total)}</th></tr></table>
@@ -244,8 +272,11 @@ VISTAS.ventas = async (cont) => {
         <div class="acciones" style="display:flex;gap:8px;margin-top:12px"><button class="sec" id="vVaciar">Vaciar</button><button id="vCobrar" style="flex:1">Cobrar ${dinero(total)}</button></div>`
         : '<p class="suave">Toca un producto para agregarlo.</p>'}
     </div></div>
-    <div class="fila" style="margin-bottom:12px">${selectorFecha()}</div><div id="listaVentas"></div>`;
+    <div class="fila" style="margin-bottom:12px">${selectorFecha()}</div><div id="listaVentas"></div>
+    ${carrito.size ? `<div class="barra-cobro"><span class="total">🛒 ${[...carrito.values()].reduce((a, b) => a + b, 0)} · ${dinero(total)}</span>
+      <button id="vIrCarrito">Ver y cobrar</button></div>` : ''}`;
   enlazarFecha(cont);
+  if (carrito.size) $('#vIrCarrito').onclick = () => $('#carritoCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   $('#buscarProd').oninput = (e) => { const q = e.target.value.toLowerCase(); cont.querySelectorAll('[data-n]').forEach((b) => b.classList.toggle('oculto', !b.dataset.n.includes(q))); };
   cont.querySelectorAll('[data-p]').forEach((b) => { b.onclick = () => {
     const id = Number(b.dataset.p); const n = (carrito.get(id) || 0) + 1;
@@ -293,10 +324,10 @@ VISTAS.inventario = async (cont) => {
   cont.innerHTML = `<div class="tarjeta tabla-scroll"><h3>Stock actual${varias ? ' · todas las sedes' : ' · ' + esc(nombreSede(ui.sedeId))}</h3>
     <input id="buscarInv" placeholder="Buscar…" style="margin-bottom:10px;max-width:300px">
     <table><tr>${varias ? '<th>Sede</th>' : ''}<th>SKU</th><th>Producto</th><th>Categoría</th><th class="num">Stock</th><th class="num">Mínimo</th><th></th></tr>
-    ${inv.map((p) => `<tr data-n="${esc((p.nombre + ' ' + p.sku + ' ' + p.categoria).toLowerCase())}">${varias ? `<td>${esc(p.sede)}</td>` : ''}<td><code>${esc(p.sku)}</code></td>
-      <td>${esc(p.nombre)}</td><td>${esc(p.categoria)}</td>
+    ${inv.map((p) => `<tr data-n="${esc((p.nombre + ' ' + p.sku + ' ' + p.categoria).toLowerCase())}">${varias ? `<td>${esc(p.sede)}</td>` : ''}<td class="ocultar-movil"><code>${esc(p.sku)}</code></td>
+      <td class="titulo-celda" data-label="">${esc(p.nombre)}</td><td class="ocultar-movil">${esc(p.categoria)}</td>
       <td class="num"><b>${p.stock}</b> ${p.bajo_minimo ? '<span class="etiqueta e-cancelada">Bajo</span>' : ''}</td><td class="num">${p.stock_minimo}</td>
-      <td style="white-space:nowrap"><button class="chico" data-mov="entrada" data-s="${p.sede_id}" data-p="${p.producto_id}">+ Entrada</button>
+      <td class="acciones-celda" data-label="" style="white-space:nowrap"><button class="chico" data-mov="entrada" data-s="${p.sede_id}" data-p="${p.producto_id}">+ Entrada</button>
         <button class="sec chico" data-mov="salida" data-s="${p.sede_id}" data-p="${p.producto_id}">− Salida</button>
         <button class="sec chico" data-mov="ajuste" data-s="${p.sede_id}" data-p="${p.producto_id}">Conteo</button>
         ${esAdmin() ? `<button class="sec chico" data-min="1" data-s="${p.sede_id}" data-p="${p.producto_id}">Mín.</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="7" class="suave">No hay productos. Créalos en "Productos".</td></tr>'}

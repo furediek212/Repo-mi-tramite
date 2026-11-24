@@ -80,3 +80,73 @@ th { font-size: 12px; text-transform: uppercase; color: var(--suave); letter-spa
   background: var(--verde); color: #fff; align-items: center; justify-content: center; font-size: 15px; margin-right: 8px; }
 code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; word-break: break-all; }
 @media (max-width: 600px) { .contenedor { padding: 12px; } .kpi .v { font-size: 20px; } }
+
+/* =====================================================================
+   CELULAR PRIMERO: ajustes para pantallas pequeñas (uso principal)
+   ===================================================================== */
+@media (min-width: 701px) { .solo-movil { display: none !important; } }
+.barra-tabs-ic { display: none; }
+@media (max-width: 700px) {
+  /* 16px evita que el iPhone haga zoom al tocar un campo */
+  input, select, textarea { font-size: 16px; padding: 11px 12px; }
+  button, .btn { min-height: 44px; }
+  button.chico { min-height: 38px; padding: 6px 12px; }
+  .solo-escritorio { display: none !important; }
+  .contenedor { padding: 12px; }
+  .tarjeta { padding: 14px; border-radius: 12px; }
+
+  /* Encabezado compacto en una sola fila */
+  .cabecera .contenedor { flex-wrap: nowrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .cabecera h1 { font-size: 17px; white-space: nowrap; }
+  .cabecera select { flex: 1; min-width: 0; padding: 8px; }
+
+  /* Pestañas como barra inferior tipo app */
+  #vistaApp .tabs { position: fixed; inset: auto 0 0 0; z-index: 8; justify-content: space-around; gap: 0;
+    border-top: 1px solid var(--borde); border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -2px 10px rgba(0,0,0,.05); }
+  #vistaApp .tabs button { flex: 1; flex-direction: column; gap: 2px; padding: 6px 2px; font-size: 11px; border-bottom: 0; border-top: 3px solid transparent; min-height: 56px; }
+  #vistaApp .tabs button.activo { border-top-color: var(--verde); background: var(--verde-claro); }
+  #vistaApp .tabs .barra-tabs-ic { display: block; font-size: 20px; line-height: 1; }
+  #vistaApp main { padding-bottom: 90px; }
+
+  /* Tablas → tarjetas apiladas */
+  table.resp, table.resp tbody { display: block; }
+  table.resp tr:first-child:has(th) { display: none; }
+  table.resp tr { display: flex; flex-direction: column; border: 1px solid var(--borde); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; background: #fff; }
+  table.resp td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 4px 0; text-align: right; }
+  table.resp td::before { content: attr(data-label); font-size: 12px; font-weight: 600; color: var(--suave); text-transform: uppercase; text-align: left; }
+  table.resp td[data-label=""]::before { content: none; }
+  table.resp td.acciones-celda { flex-wrap: wrap; justify-content: flex-start; gap: 6px; padding-top: 8px; }
+  table.resp td.acciones-celda button { flex: 1 1 auto; }
+  table.resp .ocultar-movil { display: none; }
+  table.resp td.titulo-celda { order: -1; justify-content: flex-start; font-weight: 700; font-size: 16px; text-align: left; }
+
+  /* Ventanas como hoja que sube desde abajo */
+  .modal-fondo { align-items: flex-end; padding: 0; }
+  .modal { max-width: none; border-radius: 16px 16px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); max-height: 92vh; }
+  .modal .acciones { position: sticky; bottom: -18px; background: #fff; padding-top: 10px; }
+  .modal .acciones button { flex: 1 1 auto; }
+
+  /* Agenda: chips para elegir cancha */
+  .chips-cancha { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 4px; }
+  .chips-cancha button { flex: 0 0 auto; }
+  .grilla table { min-width: 0; }
+  .grilla td.celda { height: 44px; }
+
+  /* Punto de venta: barra de cobro fija */
+  .barra-cobro { position: fixed; inset: auto 0 calc(56px + env(safe-area-inset-bottom)) 0; z-index: 7; padding: 8px 12px; background: #fff; border-top: 1px solid var(--borde); display: flex; gap: 8px; align-items: center; }
+  .barra-cobro .total { flex: 1; font-weight: 700; }
+  #gridProd .opcion { flex: 1 1 calc(50% - 8px); text-align: left; justify-content: flex-start; min-height: 64px; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi { padding: 10px; }
+}
+@media (min-width: 701px) { .barra-cobro { display: none; } .chips-cancha { display: none; } }
+@media (max-width: 700px) {
+  /* Página de reserva: un paso debajo del otro, a lo ancho */
+  .pasos .fila > * { flex: 1 1 100%; }
+  .pasos .opciones .opcion { flex: 1 1 auto; }
+  .pasos #canchas .opcion { flex: 1 1 100%; justify-content: flex-start; }
+  .slots { grid-template-columns: repeat(4, 1fr); }
+  .slot { padding: 12px 0; }
+  .paso h2 { font-size: 19px; }
+  #btnReservar { width: 100%; padding: 14px; font-size: 17px; }
+}

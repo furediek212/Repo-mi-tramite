@@ -1,0 +1,23 @@
+{
+  "_ayuda": "Edita este archivo para personalizar la página de inicio. Las fotos van en public/img/ (ver README, sección 'Página de inicio').",
+  "nombre": "Mi Cancha Fútbol Club",
+  "eslogan": "Canchas sintéticas de Fútbol 5 y Fútbol 8. Reserva en línea en menos de un minuto.",
+  "portada": "img/portada.svg",
+  "whatsapp": "573000000000",
+  "instagram": "micancha",
+  "facebook": "",
+  "galeria": [
+    { "foto": "img/galeria/cancha-1.svg", "titulo": "Cancha de Fútbol 5" },
+    { "foto": "img/galeria/cancha-2.svg", "titulo": "Cancha de Fútbol 8" },
+    { "foto": "img/galeria/cancha-3.svg", "titulo": "Iluminación para partidos nocturnos" },
+    { "foto": "img/galeria/cancha-4.svg", "titulo": "Nuestras instalaciones" }
+  ],
+  "servicios": [
+    { "icono": "🌱", "titulo": "Césped sintético", "texto": "Grama de última generación, siempre en buen estado." },
+    { "icono": "💡", "titulo": "Iluminación LED", "texto": "Juega de noche con luz profesional." },
+    { "icono": "🚿", "titulo": "Vestieres y duchas", "texto": "Espacios limpios para cambiarte antes y después." },
+    { "icono": "🥤", "titulo": "Tienda", "texto": "Bebidas, snacks, hidratantes y alquiler de petos." },
+    { "icono": "🅿️", "titulo": "Parqueadero", "texto": "Llega tranquilo, hay dónde dejar el carro o la moto." },
+    { "icono": "🏆", "titulo": "Torneos y eventos", "texto": "Organizamos torneos empresariales y cumpleaños." }
+  ]
+}

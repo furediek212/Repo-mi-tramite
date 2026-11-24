@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#166534"><link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/img/icono.svg"><link rel="apple-touch-icon" href="/img/icono.svg"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>Canchas Control · Panel</title>
 <link rel="stylesheet" href="/css/estilos.css">
 </head>
@@ -19,21 +21,22 @@
 
 <div id="vistaApp" class="oculto">
   <header class="cabecera"><div class="contenedor">
-    <h1>⚽ Canchas Control</h1>
+    <h1>⚽<span class="solo-escritorio"> Canchas Control</span></h1>
     <select id="selSede" aria-label="Sede"></select>
     <span class="espacio"></span>
-    <span id="usuarioInfo"></span>
-    <button class="sec chico" id="btnPass">Contraseña</button>
-    <button class="sec chico" id="btnSalir">Salir</button>
+    <span id="usuarioInfo" class="solo-escritorio"></span>
+    <button class="sec chico solo-escritorio" id="btnPass">Contraseña</button>
+    <button class="sec chico solo-escritorio" id="btnSalir">Salir</button>
   </div></header>
   <nav class="tabs" id="tabs">
-    <button data-v="inicio">Inicio</button>
-    <button data-v="reservas">Reservas</button>
-    <button data-v="ventas">Ventas</button>
-    <button data-v="inventario">Inventario</button>
-    <button data-v="catalogo" class="solo-admin">Productos</button>
-    <button data-v="config" class="solo-admin">Sedes y usuarios</button>
-    <button data-v="bi" class="solo-admin">Reportes / BI</button>
+    <button data-v="inicio"><span class="barra-tabs-ic">🏠</span>Inicio</button>
+    <button data-v="reservas"><span class="barra-tabs-ic">📅</span>Reservas</button>
+    <button data-v="ventas"><span class="barra-tabs-ic">🛒</span>Ventas</button>
+    <button data-v="inventario"><span class="barra-tabs-ic">📦</span>Inventario</button>
+    <button data-v="catalogo" class="solo-admin solo-escritorio">Productos</button>
+    <button data-v="config" class="solo-admin solo-escritorio">Sedes y usuarios</button>
+    <button data-v="bi" class="solo-admin solo-escritorio">Reportes / BI</button>
+    <button data-mas="1" class="solo-movil"><span class="barra-tabs-ic">☰</span>Más</button>
   </nav>
   <main class="contenedor" id="vista"></main>
 </div>

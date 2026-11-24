@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#166534"><link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/img/icono.svg"><link rel="apple-touch-icon" href="/img/icono.svg"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Canchas de fútbol 5 y 8 · Reserva en línea</title>
+<meta name="description" content="Canchas sintéticas de fútbol 5 y fútbol 8. Reserva en línea.">
+<link rel="stylesheet" href="/css/estilos.css">
+<style>
+  .nav { position: absolute; inset: 0 0 auto 0; z-index: 2; }
+  .nav .contenedor { display: flex; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; }
+  .nav .marca { color: #fff; font-weight: 800; font-size: 20px; text-decoration: none; }
+  .nav .espacio { flex: 1; }
+  .nav a.link { color: #fff; text-decoration: none; font-weight: 600; opacity: .9; }
+  .nav a.link:hover { opacity: 1; text-decoration: underline; }
+  .hero { position: relative; min-height: 78vh; display: flex; align-items: center; color: #fff;
+    background: #14532d center / cover no-repeat; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.72), rgba(0,0,0,.25)); }
+  .hero .contenedor { position: relative; padding-top: 90px; padding-bottom: 60px; }
+  .hero h1 { font-size: clamp(32px, 6vw, 58px); max-width: 720px; margin-bottom: 14px; }
+  .hero p { font-size: clamp(16px, 2.2vw, 21px); max-width: 600px; opacity: .95; margin: 0 0 26px; }
+  .hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-grande { padding: 14px 26px; font-size: 17px; border-radius: 10px; }
+  .btn-claro { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.6); color: #fff; }
+  .btn-claro:hover { background: rgba(255,255,255,.25); }
+  section.bloque { padding: 56px 0; }
+  section.bloque h2 { font-size: clamp(24px, 4vw, 34px); text-align: center; margin-bottom: 8px; }
+  section.bloque .sub { text-align: center; color: var(--suave); margin: 0 auto 32px; max-width: 600px; }
+  .alterno { background: #fff; }
+  .rejilla { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .sede { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .sede h3 { margin: 0; }
+  .sede .precios { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; }
+  .sede .precio { background: var(--verde-claro); color: var(--verde-osc); border-radius: 8px; padding: 6px 10px; font-weight: 600; font-size: 14px; }
+  .sede .btn { margin-top: auto; }
+  .galeria { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .galeria figure { margin: 0; position: relative; border-radius: 12px; overflow: hidden; cursor: zoom-in; aspect-ratio: 3 / 2; background: #e5e7eb; }
+  .galeria img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+  .galeria figure:hover img { transform: scale(1.05); }
+  .galeria figcaption { position: absolute; inset: auto 0 0 0; padding: 22px 12px 10px; color: #fff; font-weight: 600; font-size: 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+  .servicio { text-align: center; padding: 18px; }
+  .servicio .ic { font-size: 36px; }
+  .servicio h3 { margin: 8px 0 4px; font-size: 18px; }
+  .servicio p { margin: 0; color: var(--suave); }
+  .pasos3 { counter-reset: p; }
+  .pasos3 .servicio::before { counter-increment: p; content: counter(p); display: inline-flex; width: 40px; height: 40px; border-radius: 50%;
+    background: var(--verde); color: #fff; font-weight: 800; font-size: 18px; align-items: center; justify-content: center; }
+  .cta-final { background: var(--verde-osc); color: #fff; text-align: center; }
+  .cta-final h2 { color: #fff; }
+  footer { background: #0f2e1a; color: #cbd5e1; padding: 28px 0; font-size: 14px; }
+  footer a { color: #fff; }
+  footer .contenedor { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+  .wa { position: fixed; right: 18px; bottom: 18px; width: 58px; height: 58px; border-radius: 50%; background: #25d366; color: #fff;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,.25); z-index: 5; }
+  .wa:hover { background: #1ebe5b; }
+  .visor { position: fixed; inset: 0; background: rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; z-index: 20; padding: 16px; flex-direction: column; gap: 10px; }
+  .visor img { max-width: 100%; max-height: 82vh; border-radius: 8px; }
+  .visor p { color: #fff; margin: 0; }
+  .visor button { position: absolute; top: 14px; right: 14px; }
+  .visor .ant, .visor .sig { top: 50%; transform: translateY(-50%); right: auto; }
+  .visor .ant { left: 10px; } .visor .sig { left: auto; right: 10px; }
+  .barra-movil { display: none; }
+  /* ---- Celular (uso principal) ---- */
+  @media (max-width: 700px) {
+    .nav a.link { display: none; }
+    .hero { min-height: 72vh; }
+    .hero .ctas .btn { flex: 1 1 100%; }
+    section.bloque { padding: 36px 0; }
+    section.bloque .sub { margin-bottom: 20px; }
+    /* Galería: carrusel que se desliza con el dedo */
+    .galeria { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 0 -12px; padding: 0 12px 6px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .galeria::-webkit-scrollbar { display: none; }
+    .galeria figure { flex: 0 0 85%; scroll-snap-align: center; }
+    .desliza { display: block !important; }
+    /* Servicios y pasos más compactos */
+    #listaServicios { grid-template-columns: 1fr 1fr; gap: 8px; }
+    #listaServicios .servicio { background: var(--fondo); border-radius: 12px; padding: 14px 8px; }
+    #listaServicios .servicio p { font-size: 13px; }
+    .pasos3 { grid-template-columns: 1fr; gap: 4px; }
+    .pasos3 .servicio { display: grid; grid-template-columns: 40px 1fr; column-gap: 12px; text-align: left; padding: 8px 0; align-items: center; }
+    .pasos3 .servicio::before { grid-row: span 2; }
+    .pasos3 .servicio h3 { margin: 0; }
+    /* Barra fija inferior: Reservar + WhatsApp siempre a mano */
+    .barra-movil { display: flex; gap: 8px; position: fixed; inset: auto 0 0 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,.96); border-top: 1px solid var(--borde); z-index: 6; }
+    .barra-movil .btn { flex: 1; padding: 14px; font-size: 16px; }
+    .barra-movil .wa-mini { flex: 0 0 52px; background: #25d366; }
+    .wa { display: none !important; }
+    footer { padding-bottom: 96px; }
+    .visor .ant, .visor .sig { top: auto; bottom: 20px; transform: none; }
+  }
+</style>
+</head>
+<body>
+<header class="nav"><div class="contenedor">
+  <a class="marca" href="/" id="marca">⚽</a><span class="espacio"></span>
+  <a class="link" href="#sedes">Sedes</a><a class="link" href="#galeria">Fotos</a><a class="link" href="#servicios">Servicios</a>
+  <a class="btn" href="/reservar">Reservar</a>
+</div></header>
+
+<section class="hero" id="hero"><div class="contenedor">
+  <h1 id="titulo">Canchas de Fútbol 5 y Fútbol 8</h1>
+  <p id="eslogan"></p>
+  <div class="ctas">
+    <a class="btn btn-grande" href="/reservar">Reservar cancha</a>
+    <a class="btn btn-grande btn-claro" href="#sedes">Ver sedes y precios</a>
+  </div>
+</div></section>
+
+<section class="bloque" id="sedes"><div class="contenedor">
+  <h2>Nuestras sedes</h2>
+  <p class="sub">Elige la más cercana. Mira horarios y precios, y reserva en línea.</p>
+  <div class="rejilla" id="listaSedes"><p class="suave">Cargando…</p></div>
+</div></section>
+
+<section class="bloque alterno" id="galeria"><div class="contenedor">
+  <h2>Conoce las canchas</h2>
+  <p class="sub">Así se ve el lugar donde vas a jugar.</p>
+  <div class="galeria" id="fotos"></div>
+  <p class="suave desliza" style="display:none;text-align:center;font-size:13px;margin-top:8px">← Desliza para ver más fotos →</p>
+</div></section>
+
+<section class="bloque" id="servicios"><div class="contenedor">
+  <h2>Todo para tu partido</h2>
+  <p class="sub">Llegas, juegas y la pasas bien.</p>
+  <div class="rejilla" id="listaServicios"></div>
+</div></section>
+
+<section class="bloque alterno"><div class="contenedor">
+  <h2>Reservar es así de fácil</h2>
+  <p class="sub">Sin llamadas ni esperas.</p>
+  <div class="rejilla pasos3">
+    <div class="servicio"><h3>Elige sede y cancha</h3><p>Fútbol 5 o Fútbol 8.</p></div>
+    <div class="servicio"><h3>Escoge día y hora</h3><p>Ves los horarios libres en tiempo real.</p></div>
+    <div class="servicio"><h3>Recibe tu código</h3><p>Con él consultas o cancelas tu reserva.</p></div>
+  </div>
+</div></section>
+
+<section class="bloque cta-final"><div class="contenedor">
+  <h2>¿Armamos el partido?</h2>
+  <p style="opacity:.9;margin:0 0 22px">Asegura tu horario antes de que lo tome otro equipo.</p>
+  <a class="btn btn-grande btn-claro" href="/reservar">Reservar ahora</a>
+</div></section>
+
+<footer><div class="contenedor">
+  <div><b id="pieNombre" style="color:#fff"></b><div id="pieSedes"></div></div>
+  <div id="redes"></div>
+  <div><a href="/reservar">Reservar</a> · <a href="/app">Empleados</a></div>
+</div></footer>
+
+<a class="wa oculto" id="wa" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
+</a>
+
+<nav class="barra-movil" aria-label="Acciones rápidas">
+  <a class="btn" href="/reservar">⚽ Reservar cancha</a>
+  <a class="btn wa-mini oculto" id="waMini" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+</nav>
+
+<div class="visor oculto" id="visor">
+  <button class="sec" id="vCerrar" aria-label="Cerrar">✕</button>
+  <button class="sec ant" id="vAnt" aria-label="Anterior">◀</button>
+  <img id="vImg" alt=""><p id="vTxt"></p>
+  <button class="sec sig" id="vSig" aria-label="Siguiente">▶</button>
+</div>
+
+<script src="/js/comun.js"></script>
+<script>
+let cfg = {}, fotos = [], idx = 0;
+
+async function iniciar() {
+  try { cfg = await (await fetch('/home.json', { cache: 'no-cache' })).json(); } catch { cfg = {}; }
+  const nombre = cfg.nombre || 'Canchas de fútbol';
+  document.title = `${nombre} · Reserva tu cancha`;
+  $('#marca').textContent = '⚽ ' + nombre;
+  $('#pieNombre').textContent = nombre;
+  if (cfg.eslogan) $('#eslogan').textContent = cfg.eslogan;
+  if (cfg.portada) $('#hero').style.backgroundImage = `url("${encodeURI(cfg.portada)}")`;
+
+  fotos = Array.isArray(cfg.galeria) ? cfg.galeria : [];
+  $('#galeria').classList.toggle('oculto', !fotos.length);
+  $('#fotos').innerHTML = fotos.map((f, i) => `<figure data-i="${i}"><img src="${esc(f.foto)}" alt="${esc(f.titulo || 'Foto de la cancha')}" loading="lazy">
+    ${f.titulo ? `<figcaption>${esc(f.titulo)}</figcaption>` : ''}</figure>`).join('');
+
+  const serv = Array.isArray(cfg.servicios) ? cfg.servicios : [];
+  $('#servicios').classList.toggle('oculto', !serv.length);
+  $('#listaServicios').innerHTML = serv.map((s) => `<div class="servicio"><div class="ic">${esc(s.icono || '⚽')}</div>
+    <h3>${esc(s.titulo)}</h3><p>${esc(s.texto || '')}</p></div>`).join('');
+
+  const tel = String(cfg.whatsapp || '').replace(/\D/g, '');
+  if (tel) { $('#wa').href = `https://wa.me/${tel}?text=${encodeURIComponent('Hola, quiero información sobre las canchas')}`; $('#wa').classList.remove('oculto'); $('#waMini').href = $('#wa').href; $('#waMini').classList.remove('oculto'); }
+  const redes = [];
+  if (tel) redes.push(`<a target="_blank" rel="noopener" href="https://wa.me/${tel}">WhatsApp</a>`);
+  if (cfg.instagram) redes.push(`<a target="_blank" rel="noopener" href="https://instagram.com/${encodeURIComponent(cfg.instagram.replace('@', ''))}">Instagram</a>`);
+  if (cfg.facebook) redes.push(`<a target="_blank" rel="noopener" href="https://facebook.com/${encodeURIComponent(cfg.facebook)}">Facebook</a>`);
+  $('#redes').innerHTML = redes.join(' · ');
+
+  try {
+    const { sedes } = await api('/api/public/sedes');
+    $('#listaSedes').innerHTML = sedes.map((s) => {
+      const desde = (t) => { const p = s.canchas.filter((c) => c.tipo === t).map((c) => c.precio_hora); return p.length ? Math.min(...p) : null; };
+      const f5 = desde('F5'), f8 = desde('F8');
+      return `<div class="sede"><h3>${esc(s.nombre)}</h3>
+        ${s.direccion ? `<div>📍 <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.direccion)}">${esc(s.direccion)}</a></div>` : ''}
+        <div>🕒 Todos los días de ${s.hora_apertura}:00 a ${s.hora_cierre}:00</div>
+        ${s.telefono ? `<div>📞 <a href="tel:${esc(s.telefono)}">${esc(s.telefono)}</a></div>` : ''}
+        <div class="precios">${f5 !== null ? `<span class="precio">Fútbol 5 desde ${dinero(f5)}/h</span>` : ''}${f8 !== null ? `<span class="precio">Fútbol 8 desde ${dinero(f8)}/h</span>` : ''}</div>
+        <a class="btn" href="/reservar?sede=${s.id}">Reservar en esta sede</a></div>`;
+    }).join('') || '<p class="suave">Pronto publicaremos nuestras sedes.</p>';
+    $('#pieSedes').innerHTML = sedes.map((s) => `${esc(s.nombre)}${s.direccion ? ' · ' + esc(s.direccion) : ''}`).join('<br>');
+  } catch { $('#listaSedes').innerHTML = '<p class="suave">No pudimos cargar las sedes. Intenta de nuevo.</p>'; }
+}
+
+// Visor de fotos
+function verFoto(i) { idx = (i + fotos.length) % fotos.length; $('#vImg').src = fotos[idx].foto; $('#vImg').alt = fotos[idx].titulo || ''; $('#vTxt').textContent = fotos[idx].titulo || ''; $('#visor').classList.remove('oculto'); }
+$('#fotos').onclick = (e) => { const f = e.target.closest('figure'); if (f) verFoto(Number(f.dataset.i)); };
+$('#vCerrar').onclick = () => $('#visor').classList.add('oculto');
+$('#vAnt').onclick = () => verFoto(idx - 1);
+$('#vSig').onclick = () => verFoto(idx + 1);
+$('#visor').onclick = (e) => { if (e.target.id === 'visor') $('#visor').classList.add('oculto'); };
+document.addEventListener('keydown', (e) => {
+  if ($('#visor').classList.contains('oculto')) return;
+  if (e.key === 'Escape') $('#visor').classList.add('oculto');
+  if (e.key === 'ArrowLeft') verFoto(idx - 1);
+  if (e.key === 'ArrowRight') verFoto(idx + 1);
+});
+
+let toqueX = null;
+$('#visor').addEventListener('touchstart', (e) => { toqueX = e.touches[0].clientX; }, { passive: true });
+$('#visor').addEventListener('touchend', (e) => {
+  if (toqueX === null) return; const dx = e.changedTouches[0].clientX - toqueX; toqueX = null;
+  if (Math.abs(dx) > 50) verFoto(idx + (dx < 0 ? 1 : -1));
+});
+
+iniciar();
+</script>
+</body>
+</html>

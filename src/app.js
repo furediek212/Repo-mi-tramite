@@ -28,7 +28,6 @@ app.use('/api', (_req, _res, next) => next(new HttpError(404, 'Ruta no encontrad
 
 const pub = path.join(__dirname, '..', 'public');
 app.use(express.static(pub, { extensions: ['html'] }));
-app.get('/', (_req, res) => res.sendFile(path.join(pub, 'reservar.html')));
 
 // Manejo de errores uniforme: { error: "mensaje" }
 // eslint-disable-next-line no-unused-vars

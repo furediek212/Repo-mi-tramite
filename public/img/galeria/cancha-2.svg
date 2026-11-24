@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+<defs><radialGradient id="l"><stop offset="0" stop-color="#fff8d0" stop-opacity=".55"/><stop offset="1" stop-color="#fff8d0" stop-opacity="0"/></radialGradient></defs>
+<rect x="0.0" y="0" width="120.0" height="800" fill="#18733a"/><rect x="120.0" y="0" width="120.0" height="800" fill="#1d8242"/><rect x="240.0" y="0" width="120.0" height="800" fill="#18733a"/><rect x="360.0" y="0" width="120.0" height="800" fill="#1d8242"/><rect x="480.0" y="0" width="120.0" height="800" fill="#18733a"/><rect x="600.0" y="0" width="120.0" height="800" fill="#1d8242"/><rect x="720.0" y="0" width="120.0" height="800" fill="#18733a"/><rect x="840.0" y="0" width="120.0" height="800" fill="#1d8242"/><rect x="960.0" y="0" width="120.0" height="800" fill="#18733a"/><rect x="1080.0" y="0" width="120.0" height="800" fill="#1d8242"/><g fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="4">
+<rect x="40" y="40" width="1120" height="720"/>
+<line x1="600.0" y1="40" x2="600.0" y2="760"/>
+<circle cx="600.0" cy="400.0" r="120.0"/>
+<rect x="40" y="224.0" width="144.0" height="352.0"/>
+<rect x="1016.0" y="224.0" width="144.0" height="352.0"/>
+<rect x="22" y="336.0" width="18" height="128.0"/>
+<rect x="1160" y="336.0" width="18" height="128.0"/></g>
+<circle cx="600.0" cy="400.0" r="6" fill="#fff"/><g transform="translate(600.0,70)"><rect x="-190" y="-26" width="380" height="44" rx="22" fill="#000" fill-opacity=".45"/>
+<text y="4" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" fill="#fff">Foto de ejemplo · Fútbol 8</text></g></svg>

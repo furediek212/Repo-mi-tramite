@@ -4,7 +4,8 @@ Plataforma web para administrar un negocio de canchas de **fútbol 5 y fútbol 8
 
 | Necesidad | Cómo la resuelve |
 |---|---|
-| Reserva de canchas por clientes | Página pública `/` donde el cliente elige sede, tipo (F5/F8), cancha, fecha y hora, y recibe un **código de reserva**. Puede consultar o cancelar con código + celular. |
+| Página de inicio | `/` con fotos de las canchas, sedes con horarios y precios, servicios y botón de WhatsApp. Se personaliza editando `public/home.json`. |
+| Reserva de canchas por clientes | Página pública `/reservar` donde el cliente elige sede, tipo (F5/F8), cancha, fecha y hora, y recibe un **código de reserva**. Puede consultar o cancelar con código + celular. |
 | Control de reservas | Agenda visual por sede y día (`/app` → Reservas). Confirmar, marcar pagada, jugada, no asistió o cancelar. La base de datos **impide reservas dobles**. |
 | Ventas | Punto de venta simple: tocar productos → cobrar. **Descuenta el inventario automáticamente**. |
 | Inventario | Stock por sede, entradas (compras), salidas (daños, consumo), conteo físico (ajuste), alertas de stock mínimo y kardex de movimientos con usuario y hora. |
@@ -31,7 +32,8 @@ docker compose up -d
 
 Listo:
 
-- Clientes reservan en: `http://TU-SERVIDOR:3000/`
+- Página de inicio: `http://TU-SERVIDOR:3000/`
+- Clientes reservan en: `http://TU-SERVIDOR:3000/reservar`
 - Empleados ingresan en: `http://TU-SERVIDOR:3000/app`
 
 Al arrancar, la app crea/actualiza las tablas sola. No hay migraciones manuales.
@@ -95,7 +97,26 @@ npm test
 
 ---
 
-## 4. Uso diario
+## 4. Página de inicio: tus fotos y textos
+
+Todo se cambia sin programar, en dos lugares:
+
+**1. Fotos** → carpeta `public/img/`
+- `portada.jpg`: la foto grande de arriba. Ideal horizontal, de unos 1600×900 px.
+- `galeria/`: las fotos de las canchas. Horizontales, de unos 1200×800 px y menos de 500 KB cada una (puedes achicarlas gratis en [squoosh.app](https://squoosh.app)).
+- Usa nombres sin espacios ni tildes: `cancha-f5-norte.jpg`.
+
+**2. Textos** → archivo `public/home.json`
+- `nombre`, `eslogan`, `whatsapp` (con indicativo del país, sin + ni espacios: `573001234567`), `instagram`, `facebook`.
+- `portada`: ruta de la foto principal, por ejemplo `"img/portada.jpg"`.
+- `galeria`: una línea por foto con su ruta y título, por ejemplo `{ "foto": "img/galeria/cancha-f5-norte.jpg", "titulo": "Cancha F5 · Sede Norte" }`.
+- `servicios`: lo que ofreces (ícono, título, texto). Borra los que no apliquen.
+
+Las sedes, horarios y precios **no** se escriben aquí: salen solos de lo que configures en el panel.
+
+Desde la web de GitHub: entra a la carpeta → **Add file → Upload files** para subir fotos, y el ícono ✏️ para editar `home.json`. Al guardar (commit), Render vuelve a publicar la página sola en un par de minutos.
+
+## 5. Uso diario
 
 ### Primer ingreso (admin)
 1. Entra a `/app` con `ADMIN_EMAIL` / `ADMIN_PASSWORD` y cambia la contraseña (botón *Contraseña*).
@@ -115,7 +136,7 @@ npm test
 
 ---
 
-## 5. Conectar Power BI
+## 6. Conectar Power BI
 
 ### Opción A — Conexión directa a PostgreSQL (recomendada)
 
@@ -152,10 +173,11 @@ Desde el panel (`/app` → **Reportes / BI**) el admin puede descargar los mismo
 
 ---
 
-## 6. Arquitectura
+## 7. Arquitectura
 
 ```
-Clientes (navegador/celular) ──► /            Página pública de reservas
+Clientes (navegador/celular) ──► /            Inicio con fotos, sedes y precios
+                             ──► /reservar    Reserva en línea
 Empleados (admin/operador)   ──► /app         Panel (reservas, ventas, inventario, config)
                                    │
                          Node.js + Express (API REST /api/...)
@@ -183,7 +205,7 @@ Empleados (admin/operador)   ──► /app         Panel (reservas, ventas, inv
 | GET | `/api/dashboard` | Admin, operador |
 | GET | `/api/bi/:dataset` | Admin o `BI_API_KEY` |
 
-## 7. Respaldos
+## 8. Respaldos
 
 Con Docker:
 

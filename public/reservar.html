@@ -1,14 +1,16 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#166534"><link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/img/icono.svg"><link rel="apple-touch-icon" href="/img/icono.svg"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>Reserva tu cancha</title>
 <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
 <header class="cabecera"><div class="contenedor">
-  <h1>⚽ Reserva tu cancha</h1><span class="espacio"></span>
-  <button class="sec chico" id="btnMiReserva">Consultar / cancelar mi reserva</button>
+  <h1><a href="/" style="color:#fff;text-decoration:none">⚽</a> Reserva tu cancha</h1><span class="espacio"></span>
+  <button class="sec chico" id="btnMiReserva">Mi reserva</button>
 </div></header>
 
 <main class="contenedor pasos" id="flujo">
@@ -87,7 +89,10 @@ async function cargar() {
   $('#sede').innerHTML = st.sedes.map((s) => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
   $('#duraciones').innerHTML = data.duraciones.map((d) =>
     `<button class="opcion ${d === 1 ? 'sel' : ''}" data-d="${d}">${d === 1 ? '1 hora' : String(d).replace('.5', ' ½') + ' h'}</button>`).join('');
-  elegirSede(st.sedes[0]?.id);
+  const pedida = Number(new URLSearchParams(location.search).get('sede'));
+  const inicial = st.sedes.find((s) => s.id === pedida)?.id ?? st.sedes[0]?.id;
+  $('#sede').value = inicial;
+  elegirSede(inicial);
 }
 
 function elegirSede(id) {
@@ -148,7 +153,9 @@ $('#duraciones').onclick = (e) => { const b = e.target.closest('button'); if (!b
   st.hora = null; pintarSlots(); actualizarResumen(); };
 $('#fecha').onchange = (e) => { if (e.target.value) { st.fecha = e.target.value; cargarSlots(); } };
 $('#slots').onclick = (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return;
-  st.hora = b.dataset.h; pintarSlots(); actualizarResumen(); };
+  st.hora = b.dataset.h; pintarSlots(); actualizarResumen();
+  // En celular, llevar al cliente directo a sus datos para terminar la reserva
+  if (window.matchMedia('(max-width: 700px)').matches) $('#resumen').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
 $('#form').onsubmit = async (e) => {
   e.preventDefault();
